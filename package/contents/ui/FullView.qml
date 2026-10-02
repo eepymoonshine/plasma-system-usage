@@ -16,8 +16,7 @@ Item {
 
     Layout.minimumWidth: Kirigami.Units.gridUnit * 19
     Layout.preferredWidth: Kirigami.Units.gridUnit * 21
-    // Exactly as tall as the content. Plasma reopens popups at their last saved size, which
-    // otherwise leaves empty space at the bottom once the content is shorter.
+    // Fit the content exactly, or Plasma's saved popup size can leave a gap at the bottom
     readonly property real contentHeight: mainColumn.implicitHeight + Kirigami.Units.smallSpacing * 2
     Layout.minimumHeight: contentHeight
     Layout.preferredHeight: contentHeight
@@ -164,7 +163,7 @@ Item {
         // Rings
         RowLayout {
             Layout.fillWidth: true
-            // Don't stretch into spare popup height, or the cards resize when rows appear below
+            // Don't stretch, or the cards resize when rows appear below
             Layout.fillHeight: false
             spacing: Kirigami.Units.mediumSpacing
 

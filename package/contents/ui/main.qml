@@ -56,8 +56,7 @@ PlasmoidItem {
         return isFinite(v) ? v : 0
     }
     function ready(sensor) { return sensor.status === Sensors.Sensor.Ready }
-    // formattedValue uses a narrow no-break space (U+202F) that many fonts lack; the fallback
-    // font is taller and makes rows jump, so swap it for a regular one
+    // Use a normal space, the narrow one makes rows jump in some fonts
     function fmt(sensor) {
         return ready(sensor) ? sensor.formattedValue.replace(/\u202F/g, "\u00A0").replace(/\u200B/g, "") : ""
     }

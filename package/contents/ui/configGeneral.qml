@@ -54,7 +54,7 @@ KCM.SimpleKCM {
                 { text: i18n("Bars"), value: "bar" },
                 { text: i18n("Text"), value: "text" }
             ]
-            // Set after load; a binding runs too early and gets stuck on the first item
+            // Set after load, a binding gets stuck on the first item
             Component.onCompleted: currentIndex = Math.max(0, indexOfValue(cfg_panelStyle))
             onActivated: cfg_panelStyle = currentValue
         }
@@ -92,7 +92,7 @@ KCM.SimpleKCM {
                 editable: true
                 Layout.preferredWidth: Kirigami.Units.gridUnit * 14
                 model: Qt.fontFamilies()
-                // Ignore changes while loading, or the first font in the list overwrites the setting
+                // Ignore changes while loading, or the first font in the list wins
                 property bool loaded: false
                 Component.onCompleted: {
                     var fam = cfg_panelFontFamily || Kirigami.Theme.defaultFont.family

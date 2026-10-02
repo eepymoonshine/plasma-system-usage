@@ -67,7 +67,7 @@ Item {
     PlasmaComponents.Label {
         anchors.centerIn: parent
         text: Math.round(ring.percent) + (ring.showPercentSign ? "%" : "")
-        // pointSize allows fractional sizes, unlike pixelSize (0.75 converts px to pt)
+        // Point sizes can be fractional (pt = px × 0.75)
         font.pointSize: ring.fontPointSize > 0 ? ring.fontPointSize : Math.max(5.25, ring.height * ring.fontScale * 0.75)
         font.family: ring.fontFamily || Kirigami.Theme.defaultFont.family
         font.bold: ring.fontBold
