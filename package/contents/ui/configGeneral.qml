@@ -1,3 +1,7 @@
+/*
+    SPDX-License-Identifier: GPL-3.0-or-later
+*/
+
 import QtQuick
 import QtQuick.Controls as QQC2
 import QtQuick.Layouts
@@ -20,17 +24,16 @@ KCM.SimpleKCM {
     property alias cfg_warnThreshold: warnSpin.value
     property alias cfg_critThreshold: critSpin.value
 
-    // SpinBox showing value / scale with a unit suffix, e.g. 85 -> "8,5 pt" with scale 10
+    // Spin box with a unit, e.g. value 85 with scale 10 shows "8,5 pt"
     component UnitSpinBox: QQC2.SpinBox {
         property string suffix
         property int scale: 1
         property int decimals: 0
 
-        // Same width everywhere so the boxes line up; the desktop style puts the text flush
-        // against the left border, so inset it
+        // Same width so they line up, and padded since the style hugs the left border
         Layout.preferredWidth: Kirigami.Units.gridUnit * 6
         leftPadding: Kirigami.Units.mediumSpacing
-        // Accept the suffix and either decimal separator when typing
+        // Allow typing the unit and either "." or ","
         validator: RegularExpressionValidator { regularExpression: /\d+([.,]\d+)?\s*\S*/ }
         textFromValue: function(value, locale) {
             return (value / scale).toLocaleString(locale, 'f', decimals) + suffix
@@ -51,7 +54,7 @@ KCM.SimpleKCM {
                 { text: i18n("Bars"), value: "bar" },
                 { text: i18n("Text"), value: "text" }
             ]
-            // Select once the model is populated; a binding runs before that and sticks at 0
+            // Set after load; a binding runs too early and gets stuck on the first item
             Component.onCompleted: currentIndex = Math.max(0, indexOfValue(cfg_panelStyle))
             onActivated: cfg_panelStyle = currentValue
         }
@@ -64,7 +67,7 @@ KCM.SimpleKCM {
                 { text: i18n("Horizontal"), value: "horizontal" },
                 { text: i18n("Vertical"), value: "vertical" }
             ]
-            // Select once the model is populated; a binding runs before that and sticks at 0
+            // Same as above
             Component.onCompleted: currentIndex = Math.max(0, indexOfValue(cfg_panelLayout))
             onActivated: cfg_panelLayout = currentValue
         }
@@ -89,14 +92,17 @@ KCM.SimpleKCM {
                 editable: true
                 Layout.preferredWidth: Kirigami.Units.gridUnit * 14
                 model: Qt.fontFamilies()
+                // Ignore changes while loading, or the first font in the list overwrites the setting
+                property bool loaded: false
                 Component.onCompleted: {
                     var fam = cfg_panelFontFamily || Kirigami.Theme.defaultFont.family
                     var i = find(fam)
                     if (i >= 0) currentIndex = i
                     else editText = fam
+                    loaded = true
                 }
-                onActivated: cfg_panelFontFamily = currentText
-                onAccepted: cfg_panelFontFamily = editText
+                // Saves both picked and typed names, no Enter needed
+                onEditTextChanged: if (loaded && customFont.checked && editText !== "") cfg_panelFontFamily = editText
             }
         }
 
@@ -112,7 +118,7 @@ KCM.SimpleKCM {
             UnitSpinBox {
                 id: sizeSpin
                 enabled: customSize.checked
-                // Tenths of a point so half-point steps are possible
+                // Stored in tenths of a point for half-point steps
                 suffix: " pt"; scale: 10; decimals: 1
                 from: 40; to: 300; stepSize: 5
                 value: cfg_panelFontSize > 0 ? Math.round(cfg_panelFontSize * 10) : 60
@@ -141,7 +147,7 @@ KCM.SimpleKCM {
             from: 250; to: 10000; stepSize: 250
         }
 
-        // Yellow must stay below red, or the yellow band disappears
+        // Keep yellow below red
         UnitSpinBox {
             id: warnSpin
             Kirigami.FormData.label: i18n("Yellow at:")

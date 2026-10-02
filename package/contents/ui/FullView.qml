@@ -1,3 +1,7 @@
+/*
+    SPDX-License-Identifier: GPL-3.0-or-later
+*/
+
 import QtQuick
 import QtQuick.Layouts
 import org.kde.plasma.plasmoid
@@ -15,7 +19,7 @@ Item {
     Layout.minimumHeight: mainColumn.implicitHeight + Kirigami.Units.smallSpacing * 2
     Layout.preferredHeight: mainColumn.implicitHeight + Kirigami.Units.smallSpacing * 2
 
-    // ===== Reusable pieces =====
+    // Building blocks
 
     component SectionTitle: PlasmaComponents.Label {
         font.pixelSize: Kirigami.Theme.smallFont.pixelSize - 1
@@ -90,11 +94,10 @@ Item {
     component DetailRow: RowLayout {
         id: detailRow
         property string label
-        property string value      // "" while the sensor reads nothing / 0
-        property string fallback   // shown instead of "" once the row is visible
+        property string value      // "" when there's no reading
+        property string fallback   // shown when the value drops back to ""
 
-        // Once a row has shown a value, keep it: sensors like the GPU clock flip
-        // between 0 and a real value every second, which would resize the popup.
+        // Once shown, stay shown. Some sensors flicker to 0, which would resize the popup
         property bool seen: false
         onValueChanged: if (value !== "") seen = true
         Component.onCompleted: if (value !== "") seen = true
@@ -109,7 +112,7 @@ Item {
         }
     }
 
-    // ===== Layout =====
+    // Layout
 
     ColumnLayout {
         id: mainColumn
@@ -157,8 +160,7 @@ Item {
         // Rings
         RowLayout {
             Layout.fillWidth: true
-            // Children use fillHeight to match each other; don't let the row soak up spare popup
-            // height, or the cards change size whenever a row below appears
+            // Don't stretch into spare popup height, or the cards resize when rows appear below
             Layout.fillHeight: false
             spacing: Kirigami.Units.mediumSpacing
 
@@ -255,7 +257,7 @@ Item {
                 readonly property real barWidth: (width - spacing * (root.coreUsages.length - 1)) / Math.max(root.coreUsages.length, 1)
 
                 Repeater {
-                    // Model is the count, so delegates persist and only their values change
+                    // Using the count as model keeps the bars around so they animate
                     model: root.coreUsages.length
                     delegate: Item {
                         id: coreBar
@@ -330,11 +332,11 @@ Item {
                 }
             }
             DetailRow { label: i18n("Temperature"); value: root.num(gpuTemp) > 0 ? root.fmt(gpuTemp) : "" }
-            // Present from the start (not latched) since the clock reads 0 most of the time when idle
+            // Always shown, since the clock reads 0 a lot when idle
             DetailRow { label: i18n("Clock"); value: !root.ready(gpuClock) ? "" : root.num(gpuClock) > 0 ? root.fmt(gpuClock) : i18n("Idle") }
             DetailRow { label: i18n("Power"); value: root.num(gpuPower) > 0 ? root.fmt(gpuPower) : ""; fallback: "0 W" }
 
-            // VRAM bar (same shape as the model rows in Claude Usage)
+            // VRAM bar
             RowLayout {
                 visible: root.num(vramTotal) > 0
                 Layout.fillWidth: true
@@ -375,8 +377,9 @@ Item {
             spacing: Kirigami.Units.smallSpacing
 
             PlasmaComponents.Label {
-                text: i18n("Updating every %1", root.updateInterval >= 1000
-                    ? (root.updateInterval / 1000) + "s" : root.updateInterval + "ms")
+                // "1 s", "1,5 s", "1,25 s", in the user's locale
+                readonly property int decimals: root.updateInterval % 1000 === 0 ? 0 : root.updateInterval % 100 === 0 ? 1 : 2
+                text: i18n("Updating every %1 s", (root.updateInterval / 1000).toLocaleString(Qt.locale(), 'f', decimals))
                 font.pixelSize: Kirigami.Theme.smallFont.pixelSize
                 opacity: 0.65
             }

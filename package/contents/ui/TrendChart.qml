@@ -6,8 +6,8 @@
 import QtQuick
 import org.kde.kirigami as Kirigami
 
-// Multi-series sparkline (line + soft area fill), 0..100 percent scale.
-// series: array of {values: [percent, ...], color: color}
+// Sparkline for several series on a 0-100% scale.
+// series: [{values: [percent, ...], color: color}, ...]
 Canvas {
     id: chart
 
@@ -26,11 +26,11 @@ Canvas {
         var w = width - 2 * pad
         var h = height - 2 * pad
 
-        // Right-align so the newest sample is always at the right edge
+        // Newest sample sits at the right edge
         function px(offset, i) { return pad + w * (offset + i) / (capacity - 1) }
         function py(v) { return pad + h - h * Math.max(0, Math.min(v, 100)) / 100 }
 
-        // Faint 50% gridline
+        // 50% line
         ctx.strokeStyle = Qt.alpha(Kirigami.Theme.textColor, 0.08)
         ctx.lineWidth = 1
         ctx.beginPath()

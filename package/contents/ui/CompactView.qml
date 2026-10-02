@@ -1,3 +1,7 @@
+/*
+    SPDX-License-Identifier: GPL-3.0-or-later
+*/
+
 import QtQuick
 import QtQuick.Layouts
 import org.kde.plasma.plasmoid
@@ -9,7 +13,7 @@ Item {
 
     readonly property bool showLabels: Plasmoid.configuration.showLabels !== false
     readonly property string fontFamily: Plasmoid.configuration.panelFontFamily || Kirigami.Theme.defaultFont.family
-    readonly property real fontSize: Plasmoid.configuration.panelFontSize || 0   // 0 = automatic per style
+    readonly property real fontSize: Plasmoid.configuration.panelFontSize || 0   // 0 = auto
     readonly property bool fontBold: Plasmoid.configuration.panelFontBold !== false
 
     Layout.minimumWidth: usageRow.implicitWidth + Kirigami.Units.largeSpacing * 2
@@ -36,7 +40,8 @@ Item {
         rowSpacing: Kirigami.Units.smallSpacing
 
         Kirigami.Icon {
-            visible: Plasmoid.configuration.showIcon === true
+            // Always shown if everything else is hidden, so the widget doesn't vanish
+            visible: Plasmoid.configuration.showIcon === true || root.panelMetrics.length === 0
             source: "utilities-system-monitor"
             Layout.preferredWidth: Kirigami.Units.iconSizes.smallMedium
             Layout.preferredHeight: Kirigami.Units.iconSizes.smallMedium
@@ -59,7 +64,7 @@ Item {
                 columnSpacing: Kirigami.Units.smallSpacing
                 rowSpacing: 0
 
-                // Label (all styles)
+                // Label
                 PlasmaComponents.Label {
                     visible: compact.showLabels
                     Layout.alignment: Qt.AlignCenter
@@ -71,7 +76,7 @@ Item {
                     opacity: 0.55
                 }
 
-                // === TEXT STYLE ===
+                // Text style
                 Rectangle {
                     visible: root.panelStyle === "text"
                     Layout.preferredWidth: 10
@@ -83,9 +88,7 @@ Item {
                 PlasmaComponents.Label {
                     visible: root.panelStyle === "text"
                     Layout.alignment: Qt.AlignCenter
-                    // Left-aligned (hugging the dot) in a fixed two-digit box with tabular digits so
-                    // the panel doesn't jitter; single-digit values leave the slack after the number.
-                    // Grows only at 100%.
+                    // Fixed two-digit width so the panel doesn't jitter (only grows at 100%)
                     Layout.preferredWidth: Math.max(implicitWidth, Math.ceil(pctMetrics.advanceWidth))
                     horizontalAlignment: Text.AlignLeft
                     text: Math.round(metric.modelData.percent) + "%"
@@ -100,7 +103,7 @@ Item {
                     }
                 }
 
-                // === BAR STYLE ===
+                // Bar style
                 Item {
                     visible: root.panelStyle === "bar"
                     Layout.preferredWidth: 32
@@ -139,10 +142,10 @@ Item {
                     }
                 }
 
-                // === RING STYLE ===
+                // Ring style
                 UsageRing {
                     visible: root.panelStyle === "ring"
-                    // Grow the ring if a large custom font wouldn't fit inside it
+                    // Grows to fit large custom fonts
                     Layout.preferredWidth: Math.max(28, Math.ceil(ringMetrics.advanceWidth) + lineWidth * 2 + 4)
                     Layout.preferredHeight: Layout.preferredWidth
                     Layout.alignment: Qt.AlignCenter

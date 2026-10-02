@@ -16,7 +16,7 @@ PlasmoidItem {
     readonly property int updateInterval: Math.max(Plasmoid.configuration.updateInterval || 1000, 250)
     readonly property int historyLength: 60
 
-    // ===== Sensors (served by the ksystemstats daemon) =====
+    // Sensors (from ksystemstats)
 
     Sensors.Sensor { id: cpuUsage;   sensorId: "cpu/all/usage";                 updateRateLimit: root.updateInterval }
     Sensors.Sensor { id: cpuFreq;    sensorId: "cpu/all/averageFrequency";      updateRateLimit: root.updateInterval }
@@ -37,7 +37,7 @@ PlasmoidItem {
     Sensors.Sensor { id: vramUsed;   sensorId: "gpu/all/usedVram";              updateRateLimit: root.updateInterval }
     Sensors.Sensor { id: vramTotal;  sensorId: "gpu/all/totalVram" }
 
-    // One usage sensor per logical CPU (cpu/cpu0 … cpu/cpuN-1), only while the core graph is on
+    // One sensor per thread, only while the core graph is enabled
     readonly property bool showCoreGraph: Plasmoid.configuration.showCoreGraph !== false
     Instantiator {
         id: coreSensors
@@ -49,16 +49,15 @@ PlasmoidItem {
         }
     }
 
-    // ===== Derived values =====
+    // Helpers and derived values
 
     function num(sensor) {
         var v = Number(sensor.value)
         return isFinite(v) ? v : 0
     }
     function ready(sensor) { return sensor.status === Sensors.Sensor.Ready }
-    // formattedValue looks like "500\u202FM\u200BHz". Many fonts lack the narrow no-break space
-    // (U+202F), so it renders through a taller fallback font and rows jump in height as values
-    // flip. Use a plain no-break space instead and drop the zero-width space.
+    // formattedValue uses a narrow no-break space (U+202F) that many fonts lack; the fallback
+    // font is taller and makes rows jump, so swap it for a regular one
     function fmt(sensor) {
         return ready(sensor) ? sensor.formattedValue.replace(/\u202F/g, "\u00A0").replace(/\u200B/g, "") : ""
     }
@@ -69,7 +68,7 @@ PlasmoidItem {
     readonly property real vramPercent: num(vramTotal) > 0 ? num(vramUsed) / num(vramTotal) * 100 : 0
     readonly property bool hasGpu: ready(gpuUsage)
 
-    // ksystemstats has no CPU model sensor, so read it once from /proc/cpuinfo
+    // There's no sensor for the CPU model, so grab it from /proc/cpuinfo once
     property string cpuModel: ""
     Plasma5Support.DataSource {
         engine: "executable"
@@ -86,18 +85,18 @@ PlasmoidItem {
                 .replace(/ Processor/, "").replace(/\s+@.*$/, "").replace(/\s+/g, " ").trim()
     }
     function cleanGpuName(n) {
-        // "Navi 22 [Radeon RX 6700/6700 XT/...]" -> "Radeon RX 6700"
+        // "Navi 22 [Radeon RX 6700/6700 XT/...]" becomes "Radeon RX 6700"
         var m = n.match(/\[([^\]]+)\]/)
         var s = m ? m[1] : n
         return s.split("/")[0].trim()
     }
 
-    // ===== Rolling history for the trend chart =====
+    // History for the trend chart
 
     property var cpuHistory: []
     property var ramHistory: []
     property var gpuHistory: []
-    property var coreUsages: []   // latest percent per logical CPU
+    property var coreUsages: []   // latest % per thread
 
     function pushSample(list, value) {
         var next = list.slice(Math.max(0, list.length - root.historyLength + 1))
@@ -111,7 +110,7 @@ PlasmoidItem {
         repeat: true
         triggeredOnStart: true
         onTriggered: {
-            // Skip sensors that haven't delivered a first value yet, so charts don't start with a fake 0
+            // Wait for real readings so the chart doesn't start with a fake 0
             if (root.ready(cpuUsage)) root.cpuHistory = root.pushSample(root.cpuHistory, root.cpuPercent)
             if (root.ready(ramPercent)) root.ramHistory = root.pushSample(root.ramHistory, root.ramUsagePercent)
             if (root.hasGpu) root.gpuHistory = root.pushSample(root.gpuHistory, root.gpuPercent)
@@ -125,7 +124,7 @@ PlasmoidItem {
         }
     }
 
-    // ===== Styling helpers =====
+    // Styling
 
     readonly property color cpuAccent: "#D97757"
     readonly property color ramAccent: "#6A9BCC"
@@ -142,7 +141,7 @@ PlasmoidItem {
     readonly property bool isVerticalLayout: Plasmoid.configuration.panelLayout === "vertical"
     readonly property string panelStyle: Plasmoid.configuration.panelStyle || "ring"
 
-    // Metrics shown in the panel, in order
+    // What the panel shows, in order
     readonly property var panelMetrics: {
         var list = []
         if (Plasmoid.configuration.showCpu !== false)

@@ -13,7 +13,9 @@
         "Id": "org.kde.plasma.systemusage",
         "License": "GPL-3.0-or-later",
         "Name": "System Usage",
-        "Version": "1.0"
+        "Version": "1.0",
+        "Website": "https://github.com/eepymoonshine/plasma-system-usage",
+        "BugReportUrl": "https://github.com/eepymoonshine/plasma-system-usage/issues"
     },
     "X-Plasma-API-Minimum-Version": "6.0"
 }
