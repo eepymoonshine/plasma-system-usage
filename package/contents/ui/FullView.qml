@@ -16,8 +16,12 @@ Item {
 
     Layout.minimumWidth: Kirigami.Units.gridUnit * 19
     Layout.preferredWidth: Kirigami.Units.gridUnit * 21
-    Layout.minimumHeight: mainColumn.implicitHeight + Kirigami.Units.smallSpacing * 2
-    Layout.preferredHeight: mainColumn.implicitHeight + Kirigami.Units.smallSpacing * 2
+    // Exactly as tall as the content. Plasma reopens popups at their last saved size, which
+    // otherwise leaves empty space at the bottom once the content is shorter.
+    readonly property real contentHeight: mainColumn.implicitHeight + Kirigami.Units.smallSpacing * 2
+    Layout.minimumHeight: contentHeight
+    Layout.preferredHeight: contentHeight
+    Layout.maximumHeight: contentHeight
 
     // Building blocks
 
@@ -391,6 +395,5 @@ Item {
             }
         }
 
-        Item { Layout.fillHeight: true }
     }
 }
