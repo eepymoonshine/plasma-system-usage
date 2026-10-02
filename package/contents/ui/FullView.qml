@@ -88,13 +88,25 @@ Item {
     }
 
     component DetailRow: RowLayout {
+        id: detailRow
         property string label
-        property string value
-        visible: value !== ""
+        property string value      // "" while the sensor reads nothing / 0
+        property string fallback   // shown instead of "" once the row is visible
+
+        // Once a row has shown a value, keep it: sensors like the GPU clock flip
+        // between 0 and a real value every second, which would resize the popup.
+        property bool seen: false
+        onValueChanged: if (value !== "") seen = true
+        Component.onCompleted: if (value !== "") seen = true
+
+        visible: seen
         Layout.fillWidth: true
-        PlasmaComponents.Label { text: parent.label; opacity: 0.65 }
+        PlasmaComponents.Label { text: detailRow.label; opacity: 0.65 }
         Item { Layout.fillWidth: true }
-        PlasmaComponents.Label { text: parent.value; font.features: ({ "tnum": 1 }) }
+        PlasmaComponents.Label {
+            text: detailRow.value !== "" ? detailRow.value : detailRow.fallback
+            font.features: ({ "tnum": 1 })
+        }
     }
 
     // ===== Layout =====
@@ -145,6 +157,9 @@ Item {
         // Rings
         RowLayout {
             Layout.fillWidth: true
+            // Children use fillHeight to match each other; don't let the row soak up spare popup
+            // height, or the cards change size whenever a row below appears
+            Layout.fillHeight: false
             spacing: Kirigami.Units.mediumSpacing
 
             RingCard {
@@ -211,6 +226,72 @@ Item {
             }
         }
 
+        // Per-core usage
+        Card {
+            id: coresCard
+            visible: root.showCoreGraph && root.coreUsages.length > 0
+            property int hoveredCore: -1
+            readonly property real maxCore: Math.max.apply(null, root.coreUsages.concat([0]))
+
+            RowLayout {
+                Layout.fillWidth: true
+                SectionTitle { text: i18n("Cores") }
+                Item { Layout.fillWidth: true }
+                PlasmaComponents.Label {
+                    text: coresCard.hoveredCore >= 0
+                        ? i18n("Core %1: %2%", coresCard.hoveredCore, Math.round(root.coreUsages[coresCard.hoveredCore] || 0))
+                        : i18n("busiest %1%", Math.round(coresCard.maxCore))
+                    font.pixelSize: Kirigami.Theme.smallFont.pixelSize
+                    font.features: ({ "tnum": 1 })
+                    opacity: 0.55
+                }
+            }
+
+            Row {
+                id: coreBars
+                Layout.fillWidth: true
+                Layout.preferredHeight: Kirigami.Units.gridUnit * 2.5
+                spacing: root.coreUsages.length > 32 ? 1 : 2
+                readonly property real barWidth: (width - spacing * (root.coreUsages.length - 1)) / Math.max(root.coreUsages.length, 1)
+
+                Repeater {
+                    // Model is the count, so delegates persist and only their values change
+                    model: root.coreUsages.length
+                    delegate: Item {
+                        id: coreBar
+                        required property int index
+                        readonly property real percent: root.coreUsages[index] || 0
+                        width: coreBars.barWidth
+                        height: coreBars.height
+
+                        Rectangle {
+                            anchors.fill: parent
+                            radius: Math.min(2, width / 2)
+                            color: Qt.alpha(Kirigami.Theme.textColor, coreMouse.containsMouse ? 0.2 : 0.1)
+                        }
+                        Rectangle {
+                            anchors.left: parent.left
+                            anchors.right: parent.right
+                            anchors.bottom: parent.bottom
+                            height: Math.max(parent.height * Math.min(coreBar.percent, 100) / 100, 1)
+                            radius: Math.min(2, width / 2)
+                            color: root.getUsageColor(coreBar.percent)
+                            Behavior on height { NumberAnimation { duration: 400; easing.type: Easing.OutCubic } }
+                        }
+                        MouseArea {
+                            id: coreMouse
+                            anchors.fill: parent
+                            hoverEnabled: true
+                            onContainsMouseChanged: {
+                                if (containsMouse) coresCard.hoveredCore = coreBar.index
+                                else if (coresCard.hoveredCore === coreBar.index) coresCard.hoveredCore = -1
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
         // Processor
         Card {
             RowLayout {
@@ -249,8 +330,9 @@ Item {
                 }
             }
             DetailRow { label: i18n("Temperature"); value: root.num(gpuTemp) > 0 ? root.fmt(gpuTemp) : "" }
-            DetailRow { label: i18n("Clock"); value: root.num(gpuClock) > 0 ? root.fmt(gpuClock) : "" }
-            DetailRow { label: i18n("Power"); value: root.num(gpuPower) > 0 ? root.fmt(gpuPower) : "" }
+            // Present from the start (not latched) since the clock reads 0 most of the time when idle
+            DetailRow { label: i18n("Clock"); value: !root.ready(gpuClock) ? "" : root.num(gpuClock) > 0 ? root.fmt(gpuClock) : i18n("Idle") }
+            DetailRow { label: i18n("Power"); value: root.num(gpuPower) > 0 ? root.fmt(gpuPower) : ""; fallback: "0 W" }
 
             // VRAM bar (same shape as the model rows in Claude Usage)
             RowLayout {

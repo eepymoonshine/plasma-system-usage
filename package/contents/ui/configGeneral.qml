@@ -16,6 +16,7 @@ KCM.SimpleKCM {
     property string cfg_panelFontFamily
     property real cfg_panelFontSize
     property alias cfg_panelFontBold: fontBold.checked
+    property alias cfg_showCoreGraph: showCoreGraph.checked
     property alias cfg_warnThreshold: warnSpin.value
     property alias cfg_critThreshold: critSpin.value
 
@@ -103,6 +104,10 @@ KCM.SimpleKCM {
         QQC2.CheckBox { id: showCpu; Kirigami.FormData.label: i18n("Show in panel:"); text: "CPU" }
         QQC2.CheckBox { id: showRam; text: "RAM" }
         QQC2.CheckBox { id: showGpu; text: "GPU" }
+
+        Item { Kirigami.FormData.isSection: true }
+
+        QQC2.CheckBox { id: showCoreGraph; Kirigami.FormData.label: i18n("Popup:"); text: i18n("Show per-core CPU graph") }
 
         Item { Kirigami.FormData.isSection: true }
 

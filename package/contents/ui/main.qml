@@ -3,6 +3,7 @@
 */
 
 import QtQuick
+import QtQml
 import QtQuick.Layouts
 import org.kde.plasma.plasmoid
 import org.kde.plasma.core as PlasmaCore
@@ -37,6 +38,18 @@ PlasmoidItem {
     Sensors.Sensor { id: vramUsed;   sensorId: "gpu/all/usedVram";              updateRateLimit: root.updateInterval }
     Sensors.Sensor { id: vramTotal;  sensorId: "gpu/all/totalVram" }
 
+    // One usage sensor per logical CPU (cpu/cpu0 … cpu/cpuN-1), only while the core graph is on
+    readonly property bool showCoreGraph: Plasmoid.configuration.showCoreGraph !== false
+    Instantiator {
+        id: coreSensors
+        model: root.showCoreGraph ? Math.round(root.num(cpuCores)) : 0
+        delegate: Sensors.Sensor {
+            required property int index
+            sensorId: "cpu/cpu" + index + "/usage"
+            updateRateLimit: root.updateInterval
+        }
+    }
+
     // ===== Derived values =====
 
     function num(sensor) {
@@ -44,7 +57,12 @@ PlasmoidItem {
         return isFinite(v) ? v : 0
     }
     function ready(sensor) { return sensor.status === Sensors.Sensor.Ready }
-    function fmt(sensor) { return ready(sensor) ? sensor.formattedValue : "" }
+    // formattedValue looks like "500\u202FM\u200BHz". Many fonts lack the narrow no-break space
+    // (U+202F), so it renders through a taller fallback font and rows jump in height as values
+    // flip. Use a plain no-break space instead and drop the zero-width space.
+    function fmt(sensor) {
+        return ready(sensor) ? sensor.formattedValue.replace(/\u202F/g, "\u00A0").replace(/\u200B/g, "") : ""
+    }
 
     readonly property real cpuPercent: num(cpuUsage)
     readonly property real ramUsagePercent: num(ramPercent)
@@ -80,6 +98,7 @@ PlasmoidItem {
     property var cpuHistory: []
     property var ramHistory: []
     property var gpuHistory: []
+    property var coreUsages: []   // latest percent per logical CPU
 
     function pushSample(list, value) {
         var next = list.slice(Math.max(0, list.length - root.historyLength + 1))
@@ -96,6 +115,13 @@ PlasmoidItem {
             root.cpuHistory = root.pushSample(root.cpuHistory, root.cpuPercent)
             root.ramHistory = root.pushSample(root.ramHistory, root.ramUsagePercent)
             if (root.hasGpu) root.gpuHistory = root.pushSample(root.gpuHistory, root.gpuPercent)
+
+            var cores = []
+            for (var i = 0; i < coreSensors.count; i++) {
+                var sensor = coreSensors.objectAt(i)
+                cores.push(sensor ? root.num(sensor) : 0)
+            }
+            root.coreUsages = cores
         }
     }
 

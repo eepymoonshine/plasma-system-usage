@@ -7,8 +7,8 @@ A KDE Plasma 6 panel widget that shows CPU, RAM and GPU usage as color-coded rin
 ## Features
 
 - **Panel:** a ring, bar or text readout per metric, green → yellow → red at configurable thresholds (50% / 80% by default). Left-click opens the popup, middle-click opens System Monitor.
-- **Popup:** usage rings, a 60-sample trend chart, and detail cards for the processor (model, temperature, clock), memory (used, cache, swap) and graphics (model, temperature, clock, power, VRAM).
-- **Settings:** panel style and layout, which metrics to show, labels, icon, update interval, color thresholds, and the panel font family, size and weight.
+- **Popup:** usage rings, a 60-sample trend chart, an optional per-core CPU bar graph, and detail cards for the processor (model, temperature, clock), memory (used, cache, swap) and graphics (model, temperature, clock, power, VRAM).
+- **Settings:** panel style and layout, which metrics to show, labels, icon, the per-core graph, update interval, color thresholds, and the panel font family, size and weight.
 
 Data comes from KDE's `ksystemstats` daemon (the same source as System Monitor), so nothing is polled with shell commands. The CPU model name is read once from `/proc/cpuinfo`.
 

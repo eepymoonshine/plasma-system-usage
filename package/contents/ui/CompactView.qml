@@ -12,9 +12,9 @@ Item {
     readonly property real fontSize: Plasmoid.configuration.panelFontSize || 0   // 0 = automatic per style
     readonly property bool fontBold: Plasmoid.configuration.panelFontBold !== false
 
-    // Horizontal padding: full gap on the left, tighter on the right
+    // Horizontal padding (kept separate so the right side can be tuned independently)
     readonly property real leftPad: Kirigami.Units.largeSpacing
-    readonly property real rightPad: root.isVerticalLayout ? Kirigami.Units.largeSpacing : Kirigami.Units.smallSpacing
+    readonly property real rightPad: Kirigami.Units.largeSpacing
 
     Layout.minimumWidth: usageRow.implicitWidth + leftPad + rightPad
     Layout.minimumHeight: root.isVerticalLayout ? usageRow.implicitHeight + Kirigami.Units.largeSpacing * 2 : Kirigami.Units.iconSizes.medium
@@ -89,8 +89,11 @@ Item {
                 PlasmaComponents.Label {
                     visible: root.panelStyle === "text"
                     Layout.alignment: Qt.AlignCenter
-                    // Fixed width so the panel doesn't jitter as digits change
-                    Layout.preferredWidth: pctMetrics.advanceWidth
+                    // Left-aligned (hugging the dot) in a fixed two-digit box with tabular digits so
+                    // the panel doesn't jitter; single-digit values leave the slack after the number.
+                    // Grows only at 100%.
+                    Layout.preferredWidth: Math.max(implicitWidth, Math.ceil(pctMetrics.advanceWidth))
+                    horizontalAlignment: Text.AlignLeft
                     text: Math.round(metric.modelData.percent) + "%"
                     font: pctMetrics.font
                     TextMetrics {
@@ -98,7 +101,8 @@ Item {
                         font.pointSize: compact.fontSize > 0 ? compact.fontSize : Kirigami.Theme.defaultFont.pointSize - 0.4
                         font.family: compact.fontFamily
                         font.bold: compact.fontBold
-                        text: "100%"
+                        font.features: ({ "tnum": 1 })
+                        text: "00%"
                     }
                 }
 

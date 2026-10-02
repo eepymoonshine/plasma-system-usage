@@ -50,6 +50,10 @@
             <label>Bold panel numbers</label>
             <default>true</default>
         </entry>
+        <entry name="showCoreGraph" type="Bool">
+            <label>Show per-core CPU graph in the popup</label>
+            <default>true</default>
+        </entry>
         <entry name="warnThreshold" type="Int">
             <label>Percent at which a metric turns yellow</label>
             <default>50</default>
