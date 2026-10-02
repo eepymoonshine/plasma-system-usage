@@ -26,6 +26,10 @@ Canvas {
         var w = width - 2 * pad
         var h = height - 2 * pad
 
+        // Right-align so the newest sample is always at the right edge
+        function px(offset, i) { return pad + w * (offset + i) / (capacity - 1) }
+        function py(v) { return pad + h - h * Math.max(0, Math.min(v, 100)) / 100 }
+
         // Faint 50% gridline
         ctx.strokeStyle = Qt.alpha(Kirigami.Theme.textColor, 0.08)
         ctx.lineWidth = 1
@@ -38,22 +42,19 @@ Canvas {
             var vals = series[s].values
             if (!vals || vals.length < 2) continue
 
-            // Right-align so the newest sample is always at the right edge
             var offset = capacity - vals.length
-            function px(i) { return pad + w * (offset + i) / (capacity - 1) }
-            function py(v) { return pad + h - h * Math.max(0, Math.min(v, 100)) / 100 }
 
             ctx.beginPath()
-            ctx.moveTo(px(0), height)
-            for (var i = 0; i < vals.length; i++) ctx.lineTo(px(i), py(vals[i]))
-            ctx.lineTo(px(vals.length - 1), height)
+            ctx.moveTo(px(offset, 0), height)
+            for (var i = 0; i < vals.length; i++) ctx.lineTo(px(offset, i), py(vals[i]))
+            ctx.lineTo(px(offset, vals.length - 1), height)
             ctx.closePath()
             ctx.fillStyle = Qt.alpha(series[s].color, 0.12)
             ctx.fill()
 
             ctx.beginPath()
-            ctx.moveTo(px(0), py(vals[0]))
-            for (var j = 1; j < vals.length; j++) ctx.lineTo(px(j), py(vals[j]))
+            ctx.moveTo(px(offset, 0), py(vals[0]))
+            for (var j = 1; j < vals.length; j++) ctx.lineTo(px(offset, j), py(vals[j]))
             ctx.strokeStyle = series[s].color
             ctx.lineWidth = 2
             ctx.lineJoin = "round"

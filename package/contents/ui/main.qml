@@ -4,7 +4,6 @@
 
 import QtQuick
 import QtQml
-import QtQuick.Layouts
 import org.kde.plasma.plasmoid
 import org.kde.plasma.core as PlasmaCore
 import org.kde.kirigami as Kirigami
@@ -112,8 +111,9 @@ PlasmoidItem {
         repeat: true
         triggeredOnStart: true
         onTriggered: {
-            root.cpuHistory = root.pushSample(root.cpuHistory, root.cpuPercent)
-            root.ramHistory = root.pushSample(root.ramHistory, root.ramUsagePercent)
+            // Skip sensors that haven't delivered a first value yet, so charts don't start with a fake 0
+            if (root.ready(cpuUsage)) root.cpuHistory = root.pushSample(root.cpuHistory, root.cpuPercent)
+            if (root.ready(ramPercent)) root.ramHistory = root.pushSample(root.ramHistory, root.ramUsagePercent)
             if (root.hasGpu) root.gpuHistory = root.pushSample(root.gpuHistory, root.gpuPercent)
 
             var cores = []
@@ -146,11 +146,11 @@ PlasmoidItem {
     readonly property var panelMetrics: {
         var list = []
         if (Plasmoid.configuration.showCpu !== false)
-            list.push({ key: "cpu", label: "CPU", percent: root.cpuPercent })
+            list.push({ label: "CPU", percent: root.cpuPercent })
         if (Plasmoid.configuration.showRam !== false)
-            list.push({ key: "ram", label: "RAM", percent: root.ramUsagePercent })
+            list.push({ label: "RAM", percent: root.ramUsagePercent })
         if (Plasmoid.configuration.showGpu !== false && root.hasGpu)
-            list.push({ key: "gpu", label: "GPU", percent: root.gpuPercent })
+            list.push({ label: "GPU", percent: root.gpuPercent })
         return list
     }
 

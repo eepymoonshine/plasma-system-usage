@@ -20,6 +20,26 @@ KCM.SimpleKCM {
     property alias cfg_warnThreshold: warnSpin.value
     property alias cfg_critThreshold: critSpin.value
 
+    // SpinBox showing value / scale with a unit suffix, e.g. 85 -> "8,5 pt" with scale 10
+    component UnitSpinBox: QQC2.SpinBox {
+        property string suffix
+        property int scale: 1
+        property int decimals: 0
+
+        // Same width everywhere so the boxes line up; the desktop style puts the text flush
+        // against the left border, so inset it
+        Layout.preferredWidth: Kirigami.Units.gridUnit * 6
+        leftPadding: Kirigami.Units.mediumSpacing
+        // Accept the suffix and either decimal separator when typing
+        validator: RegularExpressionValidator { regularExpression: /\d+([.,]\d+)?\s*\S*/ }
+        textFromValue: function(value, locale) {
+            return (value / scale).toLocaleString(locale, 'f', decimals) + suffix
+        }
+        valueFromText: function(text, locale) {
+            return Math.round(parseFloat(text.replace(",", ".")) * scale)
+        }
+    }
+
     Kirigami.FormLayout {
         QQC2.ComboBox {
             id: styleCombo
@@ -31,7 +51,8 @@ KCM.SimpleKCM {
                 { text: i18n("Bars"), value: "bar" },
                 { text: i18n("Text"), value: "text" }
             ]
-            currentIndex: Math.max(0, indexOfValue(cfg_panelStyle))
+            // Select once the model is populated; a binding runs before that and sticks at 0
+            Component.onCompleted: currentIndex = Math.max(0, indexOfValue(cfg_panelStyle))
             onActivated: cfg_panelStyle = currentValue
         }
 
@@ -43,7 +64,8 @@ KCM.SimpleKCM {
                 { text: i18n("Horizontal"), value: "horizontal" },
                 { text: i18n("Vertical"), value: "vertical" }
             ]
-            currentIndex: Math.max(0, indexOfValue(cfg_panelLayout))
+            // Select once the model is populated; a binding runs before that and sticks at 0
+            Component.onCompleted: currentIndex = Math.max(0, indexOfValue(cfg_panelLayout))
             onActivated: cfg_panelLayout = currentValue
         }
 
@@ -53,6 +75,7 @@ KCM.SimpleKCM {
         Item { Kirigami.FormData.isSection: true }
 
         RowLayout {
+            spacing: Kirigami.Units.largeSpacing
             Kirigami.FormData.label: i18n("Font:")
             QQC2.CheckBox {
                 id: customFont
@@ -78,6 +101,7 @@ KCM.SimpleKCM {
         }
 
         RowLayout {
+            spacing: Kirigami.Units.largeSpacing
             Kirigami.FormData.label: i18n("Number size:")
             QQC2.CheckBox {
                 id: customSize
@@ -85,14 +109,13 @@ KCM.SimpleKCM {
                 checked: cfg_panelFontSize > 0
                 onToggled: cfg_panelFontSize = checked ? sizeSpin.value / 10 : 0
             }
-            QQC2.SpinBox {
+            UnitSpinBox {
                 id: sizeSpin
                 enabled: customSize.checked
-                // Stored in tenths of a point so half-point steps are possible
+                // Tenths of a point so half-point steps are possible
+                suffix: " pt"; scale: 10; decimals: 1
                 from: 40; to: 300; stepSize: 5
                 value: cfg_panelFontSize > 0 ? Math.round(cfg_panelFontSize * 10) : 60
-                textFromValue: function(v) { return (v / 10).toLocaleString(Qt.locale(), 'f', 1) + " pt" }
-                valueFromText: function(t) { return Math.round(Number.fromLocaleString(Qt.locale(), t.replace(/\s*pt$/, "")) * 10) }
                 onValueModified: cfg_panelFontSize = value / 10
             }
         }
@@ -111,27 +134,25 @@ KCM.SimpleKCM {
 
         Item { Kirigami.FormData.isSection: true }
 
-        QQC2.SpinBox {
+        UnitSpinBox {
             id: intervalSpin
             Kirigami.FormData.label: i18n("Update interval:")
+            suffix: " s"; scale: 1000; decimals: 2
             from: 250; to: 10000; stepSize: 250
-            textFromValue: function(v) { return (v / 1000).toLocaleString(Qt.locale(), 'f', 2) + " s" }
-            valueFromText: function(t) { return Math.round(Number.fromLocaleString(Qt.locale(), t.replace(/\s*s$/, "")) * 1000) }
         }
 
-        QQC2.SpinBox {
+        // Yellow must stay below red, or the yellow band disappears
+        UnitSpinBox {
             id: warnSpin
             Kirigami.FormData.label: i18n("Yellow at:")
-            from: 1; to: 99
-            textFromValue: function(v) { return v + "%" }
-            valueFromText: function(t) { return parseInt(t) }
+            suffix: "%"
+            from: 1; to: critSpin.value - 1
         }
-        QQC2.SpinBox {
+        UnitSpinBox {
             id: critSpin
             Kirigami.FormData.label: i18n("Red at:")
-            from: 2; to: 100
-            textFromValue: function(v) { return v + "%" }
-            valueFromText: function(t) { return parseInt(t) }
+            suffix: "%"
+            from: warnSpin.value + 1; to: 100
         }
     }
 }

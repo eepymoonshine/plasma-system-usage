@@ -55,6 +55,7 @@ Launch external programs through the `launcher` DataSource in `main.qml` (e.g. `
 - Per-metric accents: CPU `#D97757`, RAM `#6A9BCC`, GPU `#9C87F5`.
 - Panel number sizes use `font.pointSize`, not `font.pixelSize`: `pixelSize` is an int, so in-between sizes get truncated. Convert with pt = px × 0.75.
 - Panel font family, size and weight come from the `panelFont*` config keys; `0` / empty means automatic. New text in the panel should respect them.
+- Numeric settings use the `UnitSpinBox` inline component in `configGeneral.qml` (suffix, scale, decimals); it handles width, padding, typed input with either decimal separator, and display.
 - Adding a setting means three edits: an `<entry>` in `main.xml`, a `cfg_<name>` property plus control in `configGeneral.qml`, and reading `Plasmoid.configuration.<name>` where it's used.
 
 ## License

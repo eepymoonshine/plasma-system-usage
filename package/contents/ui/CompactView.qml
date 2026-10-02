@@ -12,13 +12,9 @@ Item {
     readonly property real fontSize: Plasmoid.configuration.panelFontSize || 0   // 0 = automatic per style
     readonly property bool fontBold: Plasmoid.configuration.panelFontBold !== false
 
-    // Horizontal padding (kept separate so the right side can be tuned independently)
-    readonly property real leftPad: Kirigami.Units.largeSpacing
-    readonly property real rightPad: Kirigami.Units.largeSpacing
-
-    Layout.minimumWidth: usageRow.implicitWidth + leftPad + rightPad
+    Layout.minimumWidth: usageRow.implicitWidth + Kirigami.Units.largeSpacing * 2
     Layout.minimumHeight: root.isVerticalLayout ? usageRow.implicitHeight + Kirigami.Units.largeSpacing * 2 : Kirigami.Units.iconSizes.medium
-    Layout.preferredWidth: usageRow.implicitWidth + leftPad + rightPad
+    Layout.preferredWidth: usageRow.implicitWidth + Kirigami.Units.largeSpacing * 2
     Layout.preferredHeight: root.isVerticalLayout ? usageRow.implicitHeight + Kirigami.Units.largeSpacing * 2 : -1
 
     MouseArea {
@@ -33,7 +29,6 @@ Item {
     GridLayout {
         id: usageRow
         anchors.centerIn: parent
-        anchors.horizontalCenterOffset: (compact.leftPad - compact.rightPad) / 2
         columns: root.isVerticalLayout ? 1 : -1
         rows: root.isVerticalLayout ? -1 : 1
         flow: root.isVerticalLayout ? GridLayout.TopToBottom : GridLayout.LeftToRight
@@ -54,7 +49,6 @@ Item {
             delegate: GridLayout {
                 id: metric
                 required property var modelData
-                required property int index
 
                 readonly property color usageColor: root.getUsageColor(modelData.percent)
 
