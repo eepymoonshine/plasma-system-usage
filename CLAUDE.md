@@ -1,6 +1,6 @@
 # System Usage plasmoid
 
-KDE Plasma 6 panel widget (`org.kde.plasma.systemusage`) showing CPU, RAM and GPU usage. It is visually modelled on the Claude Usage plasmoid (`~/.local/share/plasma/plasmoids/org.kde.plasma.claudeusage/`); when adding UI, copy that widget's patterns (cards, section titles, rings, chips) rather than inventing new ones.
+KDE Plasma 6 panel widget (`com.github.eepymoonshine.systemusage`) showing CPU, RAM and GPU usage. It is visually modelled on the Claude Usage plasmoid (`~/.local/share/plasma/plasmoids/org.kde.plasma.claudeusage/`); when adding UI, copy that widget's patterns (cards, section titles, rings, chips) rather than inventing new ones.
 
 ## Layout
 
@@ -21,11 +21,11 @@ package/                  the Plasma package (metadata.json + contents/)
 ## Dev loop
 
 The installed widget is a symlink to this repo:
-`~/.local/share/plasma/plasmoids/org.kde.plasma.systemusage -> ~/Git/plasma-system-usage/package`
+`~/.local/share/plasma/plasmoids/com.github.eepymoonshine.systemusage -> ~/Git/plasma-system-usage/package`
 
 - After editing, reload the panel with `plasmashell --replace &`. The user usually runs this themselves.
 - Do **not** run `kpackagetool6 -u package`; it replaces the symlink with a copy.
-- Test standalone with `plasmawindowed org.kde.plasma.systemusage` (shows the popup view, since `preferredRepresentation` is not forced). QML errors print to stderr.
+- Test standalone with `plasmawindowed com.github.eepymoonshine.systemusage` (shows the popup view, since `preferredRepresentation` is not forced). QML errors print to stderr.
 - Screenshot the focused window with `spectacle -b -n -a -o <file>`. The new window does not always get focus, so this can capture the wrong window.
 - Lint with `qmllint --bare -I /usr/lib/qt6/qml <file>`. It cannot resolve the cross-file `root.*` references, so ignore those warnings.
 

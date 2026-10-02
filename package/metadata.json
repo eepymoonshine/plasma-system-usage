@@ -10,7 +10,7 @@
         "Description": "CPU, RAM and GPU usage rings in your panel, styled after the Claude Usage widget.",
         "EnabledByDefault": true,
         "Icon": "utilities-system-monitor",
-        "Id": "org.kde.plasma.systemusage",
+        "Id": "com.github.eepymoonshine.systemusage",
         "License": "GPL-3.0-or-later",
         "Name": "System Usage",
         "Version": "1.0",

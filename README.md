@@ -32,7 +32,7 @@ Then right-click the panel → **Add Widgets** → search for **System Usage**.
 Run it in a window for testing:
 
 ```sh
-plasmawindowed org.kde.plasma.systemusage
+plasmawindowed com.github.eepymoonshine.systemusage
 ```
 
 ## Requirements
