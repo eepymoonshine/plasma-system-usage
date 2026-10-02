@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<kcfg xmlns="http://www.kde.org/standards/kcfg/1.0"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="http://www.kde.org/standards/kcfg/1.0
+      http://www.kde.org/standards/kcfg/1.0/kcfg.xsd">
+    <kcfgfile name=""/>
+
+    <group name="General">
+        <entry name="updateInterval" type="Int">
+            <label>Update interval in milliseconds</label>
+            <default>1000</default>
+        </entry>
+        <entry name="panelStyle" type="String">
+            <label>Panel display style (ring, bar or text)</label>
+            <default>ring</default>
+        </entry>
+        <entry name="panelLayout" type="String">
+            <label>Panel layout direction (horizontal or vertical)</label>
+            <default>horizontal</default>
+        </entry>
+        <entry name="showIcon" type="Bool">
+            <label>Show icon in panel</label>
+            <default>false</default>
+        </entry>
+        <entry name="showLabels" type="Bool">
+            <label>Show CPU/RAM/GPU labels in panel</label>
+            <default>true</default>
+        </entry>
+        <entry name="showCpu" type="Bool">
+            <label>Show CPU usage in panel</label>
+            <default>true</default>
+        </entry>
+        <entry name="showRam" type="Bool">
+            <label>Show RAM usage in panel</label>
+            <default>true</default>
+        </entry>
+        <entry name="showGpu" type="Bool">
+            <label>Show GPU usage in panel</label>
+            <default>true</default>
+        </entry>
+        <entry name="panelFontFamily" type="String">
+            <label>Font family for panel numbers and labels (empty = theme font)</label>
+            <default></default>
+        </entry>
+        <entry name="panelFontSize" type="Double">
+            <label>Font size in points for panel numbers (0 = automatic)</label>
+            <default>0</default>
+        </entry>
+        <entry name="panelFontBold" type="Bool">
+            <label>Bold panel numbers</label>
+            <default>true</default>
+        </entry>
+        <entry name="warnThreshold" type="Int">
+            <label>Percent at which a metric turns yellow</label>
+            <default>50</default>
+        </entry>
+        <entry name="critThreshold" type="Int">
+            <label>Percent at which a metric turns red</label>
+            <default>80</default>
+        </entry>
+    </group>
+</kcfg>
