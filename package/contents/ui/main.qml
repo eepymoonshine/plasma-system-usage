@@ -13,6 +13,9 @@ import org.kde.plasma.plasma5support as Plasma5Support
 PlasmoidItem {
     id: root
 
+    // Half the theme's card rounding
+    readonly property real cardRadius: Math.max(2, Math.round(Kirigami.Units.cornerRadius / 2))
+
     readonly property int updateInterval: Math.max(Plasmoid.configuration.updateInterval || 1000, 250)
     readonly property int historyLength: 60
 

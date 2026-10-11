@@ -52,6 +52,7 @@ Launch external programs through the `launcher` DataSource in `main.qml` (e.g. `
 
 ## Conventions
 
+- Card and banner corners use `root.cardRadius` (half the theme's `cornerRadius`), not `Kirigami.Units.cornerRadius`.
 - Sizes and spacing come from `Kirigami.Units` and colors from `Kirigami.Theme`; usage colors go through `root.getUsageColor(percent)` (thresholds are configurable).
 - Per-metric accents: CPU `#D97757`, RAM `#6A9BCC`, GPU `#9C87F5`.
 - Panel number sizes use `font.pointSize`, not `font.pixelSize`: `pixelSize` is an int, so in-between sizes get truncated. Convert with pt = px × 0.75.

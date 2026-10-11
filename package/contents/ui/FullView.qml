@@ -35,7 +35,7 @@ Item {
     component Card: Rectangle {
         default property alias content: inner.data
         Layout.fillWidth: true
-        radius: Kirigami.Units.cornerRadius
+        radius: root.cardRadius
         color: full.cardColor
         implicitHeight: inner.implicitHeight + Kirigami.Units.mediumSpacing * 2
 
@@ -57,7 +57,7 @@ Item {
         Layout.fillWidth: true
         Layout.fillHeight: true
         Layout.preferredWidth: 1   // equal thirds
-        radius: Kirigami.Units.cornerRadius
+        radius: root.cardRadius
         color: full.cardColor
         implicitHeight: ringCol.implicitHeight + Kirigami.Units.mediumSpacing * 2
 
