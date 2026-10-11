@@ -5,7 +5,6 @@
 import QtQuick
 import QtQuick.Layouts
 import org.kde.plasma.plasmoid
-import org.kde.plasma.components as PlasmaComponents
 import org.kde.kirigami as Kirigami
 
 Item {
@@ -65,7 +64,8 @@ Item {
                 rowSpacing: 0
 
                 // Label
-                PlasmaComponents.Label {
+                PanelLabel {
+                    panel: root.isVerticalLayout ? null : compact
                     visible: compact.showLabels
                     Layout.alignment: Qt.AlignCenter
                     text: metric.modelData.label
@@ -85,7 +85,8 @@ Item {
                     radius: 5
                     color: metric.usageColor
                 }
-                PlasmaComponents.Label {
+                PanelLabel {
+                    panel: root.isVerticalLayout ? null : compact
                     visible: root.panelStyle === "text"
                     Layout.alignment: Qt.AlignCenter
                     // Fixed two-digit width so the panel doesn't jitter (only grows at 100%)
@@ -95,9 +96,10 @@ Item {
                     font: pctMetrics.font
                     TextMetrics {
                         id: pctMetrics
-                        font.pointSize: compact.fontSize > 0 ? compact.fontSize : Kirigami.Theme.defaultFont.pointSize - 0.4
+                        font.pointSize: compact.fontSize > 0 ? compact.fontSize : Kirigami.Theme.defaultFont.pointSize
                         font.family: compact.fontFamily
                         font.bold: compact.fontBold
+                        font.styleName: ""
                         font.features: ({ "tnum": 1 })
                         text: "00%"
                     }
@@ -130,7 +132,7 @@ Item {
                         }
                     }
 
-                    PlasmaComponents.Label {
+                    PanelLabel {
                         anchors.centerIn: parent
                         text: Math.round(metric.modelData.percent)
                         font.pointSize: compact.fontSize > 0 ? compact.fontSize : 6.4
@@ -162,6 +164,7 @@ Item {
                         font.pointSize: compact.fontSize > 0 ? compact.fontSize : 1
                         font.family: compact.fontFamily
                         font.bold: compact.fontBold
+                        font.styleName: ""
                         text: "100"
                     }
                 }

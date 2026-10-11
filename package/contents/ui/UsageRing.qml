@@ -70,6 +70,8 @@ Item {
         // Point sizes can be fractional (pt = px × 0.75)
         font.pointSize: ring.fontPointSize > 0 ? ring.fontPointSize : Math.max(5.25, ring.height * ring.fontScale * 0.75)
         font.family: ring.fontFamily || Kirigami.Theme.defaultFont.family
+        // Cleared so the theme font's style name (e.g. "Text") doesn't override the weight
+        font.styleName: ""
         font.bold: ring.fontBold
     }
 }

@@ -11,6 +11,7 @@ package/                  the Plasma package (metadata.json + contents/)
   contents/ui/main.qml            PlasmoidItem: sensors, derived values, history, helpers
   contents/ui/CompactView.qml     panel representation (ring / bar / text styles)
   contents/ui/FullView.qml        popup representation (cards)
+  contents/ui/PanelLabel.qml      label centered in the panel by its glyphs, not its line box
   contents/ui/UsageRing.qml       progress ring with centered number
   contents/ui/TrendChart.qml      multi-series sparkline (Canvas)
   contents/ui/configGeneral.qml   settings page
@@ -55,6 +56,7 @@ Launch external programs through the `launcher` DataSource in `main.qml` (e.g. `
 - Per-metric accents: CPU `#D97757`, RAM `#6A9BCC`, GPU `#9C87F5`.
 - Panel number sizes use `font.pointSize`, not `font.pixelSize`: `pixelSize` is an int, so in-between sizes get truncated. Convert with pt = px × 0.75.
 - Panel font family, size and weight come from the `panelFont*` config keys; `0` / empty means automatic. New text in the panel should respect them.
+- Panel text uses `PanelLabel`, not `PlasmaComponents.Label`. Centering the line box leaves digits about 1px high next to the dots (layout rounding plus baseline snapping), so it shifts the glyphs onto the panel's center.
 - Numeric settings use the `UnitSpinBox` inline component in `configGeneral.qml` (suffix, scale, decimals); it handles width, padding, typed input with either decimal separator, and display.
 - Adding a setting means three edits: an `<entry>` in `main.xml`, a `cfg_<name>` property plus control in `configGeneral.qml`, and reading `Plasmoid.configuration.<name>` where it's used.
 
