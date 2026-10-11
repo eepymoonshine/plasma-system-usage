@@ -96,7 +96,7 @@ Item {
                     font: pctMetrics.font
                     TextMetrics {
                         id: pctMetrics
-                        font.pointSize: compact.fontSize > 0 ? compact.fontSize : Kirigami.Theme.defaultFont.pointSize
+                        font.pointSize: compact.fontSize > 0 ? compact.fontSize : Kirigami.Theme.defaultFont.pointSize - 1
                         font.family: compact.fontFamily
                         font.bold: compact.fontBold
                         font.styleName: ""
