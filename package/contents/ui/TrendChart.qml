@@ -4,7 +4,7 @@
 */
 
 import QtQuick
-import org.kde.kirigami as Kirigami
+import org.kde.ksvg as KSvg
 
 // Sparkline for several series on a 0-100% scale.
 // series: [{values: [percent, ...], color: color}, ...]
@@ -13,6 +13,15 @@ Canvas {
 
     property var series: []
     property int capacity: 60
+
+    // 50% line from the theme, behind the series
+    KSvg.SvgItem {
+        z: -1
+        x: 2; width: chart.width - 4; height: naturalSize.height
+        y: Math.round(chart.height / 2 - height / 2)
+        imagePath: "widgets/line"
+        elementId: "horizontal-line"
+    }
 
     onSeriesChanged: requestPaint()
     onWidthChanged: requestPaint()
@@ -29,14 +38,6 @@ Canvas {
         // Newest sample sits at the right edge
         function px(offset, i) { return pad + w * (offset + i) / (capacity - 1) }
         function py(v) { return pad + h - h * Math.max(0, Math.min(v, 100)) / 100 }
-
-        // 50% line
-        ctx.strokeStyle = Qt.alpha(Kirigami.Theme.textColor, 0.08)
-        ctx.lineWidth = 1
-        ctx.beginPath()
-        ctx.moveTo(pad, Math.round(pad + h / 2) + 0.5)
-        ctx.lineTo(width - pad, Math.round(pad + h / 2) + 0.5)
-        ctx.stroke()
 
         for (var s = 0; s < series.length; s++) {
             var vals = series[s].values

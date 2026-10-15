@@ -6,6 +6,7 @@ import QtQuick
 import QtQuick.Layouts
 import org.kde.plasma.plasmoid
 import org.kde.kirigami as Kirigami
+import org.kde.ksvg as KSvg
 
 Item {
     id: compact
@@ -113,23 +114,22 @@ Item {
                     Layout.minimumHeight: 20
                     Layout.alignment: Qt.AlignCenter
 
-                    Rectangle {
+                    KSvg.FrameSvgItem {
                         anchors.fill: parent
-                        radius: 3
-                        color: Kirigami.Theme.backgroundColor
-                        border.color: Kirigami.Theme.disabledTextColor
-                        border.width: 1
-
-                        Rectangle {
-                            anchors.bottom: parent.bottom
-                            anchors.left: parent.left
-                            anchors.right: parent.right
-                            anchors.margins: 1
-                            height: Math.max((parent.height - 2) * Math.min(metric.modelData.percent / 100, 1), 1)
-                            radius: 2
-                            color: metric.usageColor
-                            Behavior on height { NumberAnimation { duration: 400; easing.type: Easing.OutCubic } }
-                        }
+                        imagePath: "widgets/bar_meter_vertical"
+                        prefix: "bar-inactive"
+                    }
+                    KSvg.FrameSvgItem {
+                        anchors.bottom: parent.bottom
+                        anchors.left: parent.left
+                        anchors.right: parent.right
+                        imagePath: "widgets/bar_meter_vertical"
+                        prefix: "bar-active"
+                        height: Math.max(parent.height * Math.min(metric.modelData.percent / 100, 1), fixedMargins.top + fixedMargins.bottom)
+                        // The theme's bar is painted in the highlight color
+                        Kirigami.Theme.highlightColor: metric.usageColor
+                        Kirigami.Theme.inherit: false
+                        Behavior on height { NumberAnimation { duration: 400; easing.type: Easing.OutCubic } }
                     }
 
                     PanelLabel {

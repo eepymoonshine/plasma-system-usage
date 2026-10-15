@@ -13,9 +13,6 @@ import org.kde.plasma.plasma5support as Plasma5Support
 PlasmoidItem {
     id: root
 
-    // Half the theme's card rounding
-    readonly property real cardRadius: Math.max(2, Math.round(Kirigami.Units.cornerRadius / 2))
-
     readonly property int updateInterval: Math.max(Plasmoid.configuration.updateInterval || 1000, 250)
     readonly property int historyLength: 60
 
@@ -128,9 +125,14 @@ PlasmoidItem {
 
     // Styling
 
-    readonly property color cpuAccent: "#D97757"
-    readonly property color ramAccent: "#6A9BCC"
-    readonly property color gpuAccent: "#9C87F5"
+    // The theme's accent, plus two hue-rotated copies so the metrics stay distinguishable
+    readonly property color cpuAccent: Kirigami.Theme.highlightColor
+    readonly property color ramAccent: rotateHue(cpuAccent, 1 / 3)
+    readonly property color gpuAccent: rotateHue(cpuAccent, -1 / 3)
+
+    function rotateHue(c, turns) {
+        return Qt.hsla((Math.max(c.hslHue, 0) + turns + 1) % 1, c.hslSaturation, c.hslLightness, c.a)
+    }
 
     function getUsageColor(percent) {
         var warn = Plasmoid.configuration.warnThreshold || 50

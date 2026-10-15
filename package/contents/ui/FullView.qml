@@ -6,21 +6,20 @@ import QtQuick
 import QtQuick.Layouts
 import org.kde.plasma.plasmoid
 import org.kde.plasma.components as PlasmaComponents
+import org.kde.plasma.extras as PlasmaExtras
 import org.kde.kirigami as Kirigami
+import org.kde.ksvg as KSvg
 
-Item {
+PlasmaExtras.Representation {
     id: full
-    clip: true
-
-    readonly property color cardColor: Qt.alpha(Kirigami.Theme.textColor, 0.07)
 
     Layout.minimumWidth: Kirigami.Units.gridUnit * 19
     Layout.preferredWidth: Kirigami.Units.gridUnit * 21
     // Fit the content exactly, or Plasma's saved popup size can leave a gap at the bottom
-    readonly property real contentHeight: mainColumn.implicitHeight + Kirigami.Units.smallSpacing * 2
-    Layout.minimumHeight: contentHeight
-    Layout.preferredHeight: contentHeight
-    Layout.maximumHeight: contentHeight
+    Layout.minimumHeight: implicitHeight
+    Layout.preferredHeight: implicitHeight
+    Layout.maximumHeight: implicitHeight
+    spacing: Kirigami.Units.smallSpacing
 
     // Building blocks
 
@@ -32,11 +31,11 @@ Item {
         opacity: 0.55
     }
 
-    component Card: Rectangle {
+    component Card: KSvg.FrameSvgItem {
         default property alias content: inner.data
         Layout.fillWidth: true
-        radius: root.cardRadius
-        color: full.cardColor
+        imagePath: "widgets/frame"
+        prefix: "plain"
         implicitHeight: inner.implicitHeight + Kirigami.Units.mediumSpacing * 2
 
         ColumnLayout {
@@ -47,7 +46,7 @@ Item {
         }
     }
 
-    component RingCard: Rectangle {
+    component RingCard: KSvg.FrameSvgItem {
         id: ringCard
         property string title
         property string subtitle
@@ -57,8 +56,8 @@ Item {
         Layout.fillWidth: true
         Layout.fillHeight: true
         Layout.preferredWidth: 1   // equal thirds
-        radius: root.cardRadius
-        color: full.cardColor
+        imagePath: "widgets/frame"
+        prefix: "plain"
         implicitHeight: ringCol.implicitHeight + Kirigami.Units.mediumSpacing * 2
 
         ColumnLayout {
@@ -117,18 +116,8 @@ Item {
 
     // Layout
 
-    ColumnLayout {
-        id: mainColumn
-        anchors.fill: parent
-        anchors.topMargin: Kirigami.Units.smallSpacing
-        anchors.bottomMargin: Kirigami.Units.smallSpacing
-        anchors.leftMargin: Kirigami.Units.mediumSpacing
-        anchors.rightMargin: Kirigami.Units.mediumSpacing
-        spacing: Kirigami.Units.smallSpacing
-
-        // Header
-        RowLayout {
-            Layout.fillWidth: true
+    header: PlasmaExtras.PlasmoidHeading {
+        contentItem: RowLayout {
             spacing: Kirigami.Units.smallSpacing
 
             Kirigami.Icon {
@@ -136,29 +125,32 @@ Item {
                 Layout.preferredWidth: Kirigami.Units.iconSizes.smallMedium
                 Layout.preferredHeight: Kirigami.Units.iconSizes.smallMedium
             }
-            PlasmaComponents.Label {
+            Kirigami.Heading {
+                level: 1
                 text: i18n("System Usage")
-                font.bold: true
-                font.pixelSize: Kirigami.Theme.defaultFont.pixelSize * 1.25
             }
             Item { Layout.fillWidth: true }
 
-            Rectangle {
+            KSvg.FrameSvgItem {
                 visible: root.ready(cpuCores)
                 Layout.preferredWidth: coresLabel.implicitWidth + Kirigami.Units.largeSpacing
                 Layout.preferredHeight: coresLabel.implicitHeight + Kirigami.Units.smallSpacing
-                radius: height / 2
-                color: Qt.alpha(root.cpuAccent, 0.18)
+                imagePath: "widgets/viewitem"
+                prefix: "selected"
 
                 PlasmaComponents.Label {
                     id: coresLabel
                     anchors.centerIn: parent
                     text: i18n("%1 threads", Math.round(root.num(cpuCores)))
                     font.pixelSize: Kirigami.Theme.smallFont.pixelSize
-                    font.bold: true; color: root.cpuAccent
+                    font.bold: true
                 }
             }
         }
+    }
+
+    contentItem: ColumnLayout {
+        spacing: Kirigami.Units.smallSpacing
 
         // Rings
         RowLayout {
@@ -269,18 +261,22 @@ Item {
                         width: coreBars.barWidth
                         height: coreBars.height
 
-                        Rectangle {
+                        KSvg.FrameSvgItem {
                             anchors.fill: parent
-                            radius: Math.min(2, width / 2)
-                            color: Qt.alpha(Kirigami.Theme.textColor, coreMouse.containsMouse ? 0.2 : 0.1)
+                            imagePath: "widgets/bar_meter_vertical"
+                            prefix: "bar-inactive"
+                            opacity: coreMouse.containsMouse ? 1 : 0.6
                         }
-                        Rectangle {
+                        KSvg.FrameSvgItem {
                             anchors.left: parent.left
                             anchors.right: parent.right
                             anchors.bottom: parent.bottom
-                            height: Math.max(parent.height * Math.min(coreBar.percent, 100) / 100, 1)
-                            radius: Math.min(2, width / 2)
-                            color: root.getUsageColor(coreBar.percent)
+                            imagePath: "widgets/bar_meter_vertical"
+                            prefix: "bar-active"
+                            height: Math.max(parent.height * Math.min(coreBar.percent, 100) / 100, fixedMargins.top + fixedMargins.bottom)
+                            // The theme's bar is painted in the highlight color
+                            Kirigami.Theme.highlightColor: root.getUsageColor(coreBar.percent)
+                            Kirigami.Theme.inherit: false
                             Behavior on height { NumberAnimation { duration: 400; easing.type: Easing.OutCubic } }
                         }
                         MouseArea {
@@ -346,18 +342,14 @@ Item {
                 spacing: Kirigami.Units.smallSpacing
 
                 PlasmaComponents.Label { text: "VRAM"; opacity: 0.65; Layout.preferredWidth: Kirigami.Units.gridUnit * 3.5 }
-                Rectangle {
+                PlasmaComponents.ProgressBar {
                     Layout.fillWidth: true
-                    Layout.preferredHeight: 6
-                    radius: 3
-                    color: Qt.alpha(Kirigami.Theme.textColor, 0.15)
-                    Rectangle {
-                        width: parent.width * Math.min(root.vramPercent / 100, 1)
-                        height: parent.height
-                        radius: 3
-                        color: root.getUsageColor(root.vramPercent)
-                        Behavior on width { NumberAnimation { duration: 400; easing.type: Easing.OutCubic } }
-                    }
+                    from: 0; to: 100
+                    value: root.vramPercent
+                    // The theme's bar is painted in the highlight color
+                    Kirigami.Theme.highlightColor: root.getUsageColor(root.vramPercent)
+                    Kirigami.Theme.inherit: false
+                    Behavior on value { NumberAnimation { duration: 400; easing.type: Easing.OutCubic } }
                 }
                 PlasmaComponents.Label {
                     text: Math.round(root.vramPercent) + "%"
@@ -373,10 +365,10 @@ Item {
                 font.pixelSize: Kirigami.Theme.smallFont.pixelSize; opacity: 0.55
             }
         }
+    }
 
-        // Footer
-        RowLayout {
-            Layout.fillWidth: true
+    footer: PlasmaExtras.PlasmoidHeading {
+        contentItem: RowLayout {
             spacing: Kirigami.Units.smallSpacing
 
             PlasmaComponents.Label {
@@ -393,6 +385,5 @@ Item {
                 onClicked: root.openSystemMonitor()
             }
         }
-
     }
 }

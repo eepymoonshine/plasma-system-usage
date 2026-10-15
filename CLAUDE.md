@@ -52,9 +52,9 @@ Launch external programs through the `launcher` DataSource in `main.qml` (e.g. `
 
 ## Conventions
 
-- Card and banner corners use `root.cardRadius` (half the theme's `cornerRadius`), not `Kirigami.Units.cornerRadius`.
+- Styling comes from the Plasma theme SVGs: the popup is a `PlasmaExtras.Representation` with `PlasmoidHeading` header and footer, cards are `KSvg.FrameSvgItem` (`widgets/frame`, prefix `plain`), bars use `widgets/bar_meter_*` (or `PlasmaComponents.ProgressBar`). Bars take their fill color from `Kirigami.Theme.highlightColor`, so override it (with `Kirigami.Theme.inherit: false`) to show usage colors.
 - Sizes and spacing come from `Kirigami.Units` and colors from `Kirigami.Theme`; usage colors go through `root.getUsageColor(percent)` (thresholds are configurable).
-- Per-metric accents: CPU `#D97757`, RAM `#6A9BCC`, GPU `#9C87F5`.
+- Per-metric accents follow the theme: CPU is `Kirigami.Theme.highlightColor`, RAM and GPU are its hue rotated by ±120° (`root.rotateHue`).
 - Panel number sizes use `font.pointSize`, not `font.pixelSize`: `pixelSize` is an int, so in-between sizes get truncated. Convert with pt = px × 0.75.
 - Panel font family, size and weight come from the `panelFont*` config keys; `0` / empty means automatic. New text in the panel should respect them.
 - Panel text uses `PanelLabel`, not `PlasmaComponents.Label`. Centering the line box leaves digits about 1px high next to the dots (layout rounding plus baseline snapping), so it shifts the glyphs onto the panel's center.
